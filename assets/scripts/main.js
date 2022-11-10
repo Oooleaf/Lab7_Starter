@@ -68,15 +68,48 @@ async function getRecipes() {
   // EXPOSE - START (All expose numbers start with A)
   // A1. TODO - Check local storage to see if there are any recipes.
   //            If there are recipes, return them.
+ 
+  if(localStorage.getItem('recipes') != null){
+    return JSON.parse(localStorage.getItem('recipes'));
+  }
   /**************************/
   // The rest of this method will be concerned with requesting the recipes
   // from the network
   // A2. TODO - Create an empty array to hold the recipes that you will fetch
+  let arr = [];
   // A3. TODO - Return a new Promise. If you are unfamiliar with promises, MDN
   //            has a great article on them. A promise takes one parameter - A
   //            function (we call these callback functions). That function will
   //            take two parameters - resolve, and reject. These are functions
   //            you can call to either resolve the Promise or Reject it.
+  return new Promise(async (resolve, reject) =>{
+    //a4 loop in RECIPE_URLS
+    for (const k of RECIPE_URLS) {
+      //a5 create try / catch block
+      try {
+        //a6-a9
+        //a6_fetch URL
+        const response = await fetch(k);
+        //a7_for each fetch response, retrieve the JSOn from it using .json()
+        const recipess = await response.json();
+        //a8_add new recipe to the recipes array
+        arr.push(recipess);
+        //a9_check whehter finished retrieving all recipes. 
+        //if done, save recipes to storage, pass recipes array to resolve method
+        if(arr.length == RECIPE_URLS.length){
+          saveRecipesToStorage(arr);
+          resolve(arr);
+        }
+      } catch (err) {
+        //a10-a11
+        //a10_Log any errors from catch using console.error
+        console.error(err);
+        //a11_Pass any errors to the Promise's reject() function
+        reject(err);
+      }
+    }
+
+  });
   /**************************/
   // A4-A11 will all be *inside* the callback function we passed to the Promise
   // we're returning
